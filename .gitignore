@@ -1,0 +1,13 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore Datasets contents...
+Datasets/*
+
+# ... But keep the Datasets folder itself (using a placeholder)
+!Datasets/.gitkeep
+
+# Ignore virtual environments (optional but recommended)
+venv/
+.env
