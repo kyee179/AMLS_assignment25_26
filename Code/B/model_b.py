@@ -1,18 +1,22 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.models import resnet18
+from torchvision.models import resnet18, resnet50
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 
-class ResNet18_28x28(nn.Module):
+class ResNet_28x28(nn.Module):
     """
-    ResNet-18 adapted for 28x28 Grayscale images (1 channel).
+    Wrapper to adapt standard ResNet architectures for 28x28 Grayscale images.
     """
 
-    def __init__(self, num_classes=1):
-        super(ResNet18_28x28, self).__init__()
-        self.resnet = resnet18(weights=None)
+    def __init__(self, version="resnet18", num_classes=1):
+        super(ResNet_28x28, self).__init__()
+
+        if version == "resnet50":
+            self.resnet = resnet50(weights=None)
+        else:
+            self.resnet = resnet18(weights=None)
 
         self.resnet.conv1 = nn.Conv2d(
             1, 64, kernel_size=3, stride=1, padding=1, bias=False
@@ -20,19 +24,32 @@ class ResNet18_28x28(nn.Module):
 
         self.resnet.maxpool = nn.Identity()
 
-        self.resnet.fc = nn.Linear(self.resnet.fc.in_features, num_classes)
+        in_features = self.resnet.fc.in_features
+        self.resnet.fc = nn.Linear(in_features, num_classes)
 
     def forward(self, x):
         return self.resnet(x)
 
 
 class ModelB:
-    def __init__(self, learning_rate=0.001, epochs=20):
+    def __init__(self, model_type="resnet18", learning_rate=0.001, epochs=20):
+        """
+        Args:
+            model_type (str): 'resnet18' (Low Complexity) or 'resnet50' (High Complexity)
+        """
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = ResNet18_28x28(num_classes=1).to(self.device)
-        self.criterion = nn.BCEWithLogitsLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.epochs = epochs
+        self.model_type = model_type.lower()
+        self.learning_rate = learning_rate
+
+        self.model = ResNet_28x28(version=self.model_type, num_classes=1).to(
+            self.device
+        )
+
+        self.criterion = nn.BCEWithLogitsLoss()
+
+        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
+
         self.history = {
             "train_loss": [],
             "val_loss": [],
@@ -41,7 +58,9 @@ class ModelB:
         }
 
     def train(self, train_loader, val_loader):
-        print(f"Training ResNet-18 on {self.device} for {self.epochs} epochs...")
+        print(
+            f"Training {self.model_type.upper()} on {self.device} for {self.epochs} epochs..."
+        )
 
         for epoch in range(self.epochs):
             self.model.train()
@@ -75,11 +94,12 @@ class ModelB:
             self.history["train_acc"].append(train_acc)
             self.history["val_acc"].append(val_acc)
 
-            print(
-                f"Epoch [{epoch+1}/{self.epochs}] "
-                f"Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f} | "
-                f"Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}"
-            )
+            if (epoch + 1) % 5 == 0 or epoch == 0:
+                print(
+                    f"Epoch [{epoch+1}/{self.epochs}] "
+                    f"Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f} | "
+                    f"Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}"
+                )
 
         return self.history
 
@@ -117,5 +137,6 @@ class ModelB:
         p, r, f1, _ = precision_recall_fscore_support(
             y_true, y_pred, average="binary", zero_division=0
         )
-        print(f"--- {dataset_name} Metrics (ResNet) ---")
+        print(f"--- {dataset_name} Metrics ({self.model_type}) ---")
         print(f"Acc: {acc:.4f}, Prec: {p:.4f}, Rec: {r:.4f}, F1: {f1:.4f}")
+        return acc, f1

@@ -15,7 +15,7 @@ from Code.A.model_a import ModelA
 from Code.B.model_b import ModelB
 
 
-def plot_learning_curves(history):
+def plot_learning_curves(history, title="Model Training"):
     """
     Plots Train vs Val Loss to visualize Overfitting.
     """
@@ -26,7 +26,7 @@ def plot_learning_curves(history):
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history["train_loss"], "b-", label="Training Loss")
     plt.plot(epochs, history["val_loss"], "r-", label="Validation Loss")
-    plt.title("Loss Curve (Overfitting Check)")
+    plt.title(f"{title}: Loss Curve (Overfitting Check)")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
@@ -34,7 +34,7 @@ def plot_learning_curves(history):
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history["train_acc"], "b-", label="Training Acc")
     plt.plot(epochs, history["val_acc"], "r-", label="Validation Acc")
-    plt.title("Accuracy Curve")
+    plt.title(f"{title}: Accuracy Curve")
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
     plt.legend()
@@ -70,8 +70,8 @@ def run_model_a(augment=False, perform_grid_search=False):
     model.evaluate(x_test_feats, y_test)
 
 
-def run_model_b(augment=False):
-    print("\n=== Running Model B (ResNet18) ===")
+def run_model_b(augment=False, resnet_version="resnet18"):
+    print(f"\n=== Running Model B ({resnet_version.upper()}) ===")
 
     extra_transforms = get_torch_augmentations() if augment else None
 
@@ -79,11 +79,11 @@ def run_model_b(augment=False):
         batch_size=32, extra_transforms=extra_transforms
     )
 
-    model = ModelB(epochs=20, learning_rate=0.001)
+    model = ModelB(model_type=resnet_version, epochs=20, learning_rate=0.001)
 
     history = model.train(train_loader, val_loader)
 
-    plot_learning_curves(history)
+    plot_learning_curves(history, title=resnet_version.upper())
 
     model.evaluate(test_loader)
 
@@ -92,10 +92,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, choices=["A", "B"], required=True)
     parser.add_argument("--augment", action="store_true", help="Use data augmentation")
+
     parser.add_argument(
         "--grid_search",
         action="store_true",
         help="(Model A Only) Run hyperparameter search",
+    )
+
+    parser.add_argument(
+        "--resnet_version",
+        type=str,
+        choices=["resnet18", "resnet50"],
+        default="resnet18",
+        help="(Model B Only) Select model complexity: resnet18 (Base) vs resnet50 (High Complexity)",
     )
 
     args = parser.parse_args()
@@ -103,4 +112,4 @@ if __name__ == "__main__":
     if args.model == "A":
         run_model_a(augment=args.augment, perform_grid_search=args.grid_search)
     elif args.model == "B":
-        run_model_b(augment=args.augment)
+        run_model_b(augment=args.augment, resnet_version=args.resnet_version)
