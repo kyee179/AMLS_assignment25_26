@@ -42,21 +42,29 @@ def plot_learning_curves(history, title="Model Training"):
     plt.show()
 
 
-def run_model_a(augment=False, perform_grid_search=False):
-    print("\n=== Running Model A (SVM + HOG + PCA) ===")
+def run_model_a(augment=False, perform_grid_search=False, use_feature_extraction=True):
+    mode_str = "SVM + HOG + PCA" if use_feature_extraction else "SVM + Raw Pixels"
+    print(f"\n=== Running Model A ({mode_str}) ===")
     (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_breastmnist_numpy()
 
     if augment:
+        print("-> Applying Augmentation (Gaussian Noise + Contrast)")
         x_train = NumpyAugmentations.add_gaussian_noise(x_train)
         x_train = NumpyAugmentations.adjust_contrast(x_train)
 
-    preprocessor = ImagePreprocessor(use_hog=True, use_pca=True, pca_components=30)
+    preprocessor = ImagePreprocessor(
+        use_hog=use_feature_extraction,
+        use_pca=use_feature_extraction,
+        pca_components=30,
+    )
+
     x_train_feats = preprocessor.fit_transform(x_train)
     x_test_feats = preprocessor.transform(x_test)
 
     model = ModelA()
 
     if perform_grid_search:
+        print("-> Running Grid Search...")
         results = model.grid_search(x_train_feats, y_train)
         print("\nTop 5 Configs by Accuracy:")
         print(
@@ -67,11 +75,15 @@ def run_model_a(augment=False, perform_grid_search=False):
     else:
         model.train(x_train_feats, y_train)
 
+    print("-> Evaluating on Test Set...")
     model.evaluate(x_test_feats, y_test)
 
 
 def run_model_b(augment=False, resnet_version="resnet18"):
     print(f"\n=== Running Model B ({resnet_version.upper()}) ===")
+
+    if augment:
+        print("-> Applying Augmentation (PyTorch Transforms)")
 
     extra_transforms = get_torch_augmentations() if augment else None
 
@@ -88,15 +100,43 @@ def run_model_b(augment=False, resnet_version="resnet18"):
     model.evaluate(test_loader)
 
 
+def run_all_experiments():
+    """
+    Runs the full suite of experiments requested.
+    """
+    print(">>> RUNNING ALL EXPERIMENTS <<<")
+
+    run_model_a(augment=False, perform_grid_search=True, use_feature_extraction=True)
+
+    run_model_a(augment=True, perform_grid_search=True, use_feature_extraction=True)
+
+    run_model_a(augment=False, perform_grid_search=True, use_feature_extraction=False)
+
+    run_model_b(augment=False, resnet_version="resnet18")
+
+    run_model_b(augment=False, resnet_version="resnet50")
+
+    run_model_b(augment=True, resnet_version="resnet18")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, choices=["A", "B"], required=True)
+    parser.add_argument(
+        "--model", type=str, choices=["A", "B"], help="Model type (A or B)"
+    )
+
     parser.add_argument("--augment", action="store_true", help="Use data augmentation")
 
     parser.add_argument(
         "--grid_search",
         action="store_true",
         help="(Model A Only) Run hyperparameter search",
+    )
+
+    parser.add_argument(
+        "--no_feature_extraction",
+        action="store_true",
+        help="(Model A Only) Disable HOG+PCA and use raw pixel features",
     )
 
     parser.add_argument(
@@ -109,7 +149,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.model == "A":
-        run_model_a(augment=args.augment, perform_grid_search=args.grid_search)
+    if args.model is None:
+        run_all_experiments()
+    elif args.model == "A":
+        use_features = not args.no_feature_extraction
+        run_model_a(
+            augment=args.augment,
+            perform_grid_search=args.grid_search,
+            use_feature_extraction=use_features,
+        )
     elif args.model == "B":
         run_model_b(augment=args.augment, resnet_version=args.resnet_version)
