@@ -24,11 +24,7 @@ class ModelA:
         Useful for discussing Model Complexity.
         """
         print(">> Running Grid Search to analyze Model Complexity...")
-        param_grid = {
-            "C": [0.1, 1, 10, 100],
-            "kernel": ["linear", "rbf"],
-            "gamma": ["scale", 0.1, 0.01],
-        }
+        param_grid = {"C": [0.1, 1, 10, 100], "kernel": ["linear", "rbf"]}
 
         grid = GridSearchCV(
             SVC(probability=True), param_grid, cv=3, scoring="accuracy", verbose=2

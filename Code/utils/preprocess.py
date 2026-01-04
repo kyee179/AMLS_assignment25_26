@@ -18,6 +18,11 @@ class ImagePreprocessor:
         self.scaler = StandardScaler()
         self._is_fitted = False
 
+    def _normalize(self, X):
+        if X.max() > 1.0:
+            return X.astype(np.float32) / 255.0
+        return X.astype(np.float32)
+
     def extract_hog(self, images):
         hog_features = []
         for img in images:
@@ -33,6 +38,7 @@ class ImagePreprocessor:
         return np.array(hog_features)
 
     def fit_transform(self, X):
+        X = self._normalize(X)
         if self.use_hog:
             X_processed = self.extract_hog(X)
         else:
@@ -52,6 +58,8 @@ class ImagePreprocessor:
         if not self._is_fitted:
             raise RuntimeError("Preprocessor must be fitted on training data first.")
 
+        X = self._normalize(X)
+
         if self.use_hog:
             X_processed = self.extract_hog(X)
         else:
@@ -69,7 +77,7 @@ class AddGaussianNoise(object):
     Custom PyTorch transform to add Gaussian noise to a tensor.
     """
 
-    def __init__(self, mean=0.0, std=0.1):
+    def __init__(self, mean=0.0, std=0.02):
         self.mean = mean
         self.std = std
 
@@ -94,14 +102,14 @@ def get_torch_augmentations():
             transforms.ColorJitter(brightness=0.5, contrast=0.5),
         ],
         "tensor": [
-            AddGaussianNoise(mean=0.0, std=0.1),
+            AddGaussianNoise(mean=0.0, std=0.02),
         ],
     }
 
 
 class NumpyAugmentations:
     @staticmethod
-    def add_gaussian_noise(images, mean=0, std=10):
+    def add_gaussian_noise(images, mean=0, std=3):
         noisy_images = images.copy().astype(np.float32)
         noise = np.random.normal(mean, std, images.shape)
         noisy_images += noise
