@@ -35,7 +35,7 @@ The role of each file in the repository is described below:
 ---
 
 ## 3. Required Packages
-To run this code, the following Python packages are required.
+To run this code, some Python packages required are listed below.
 
 * **`numpy`**: For array manipulation and data handling.
 * **`torch`** & **`torchvision`**: For building and training the ResNet model (Model B) and data transformations.
@@ -45,7 +45,7 @@ To run this code, the following Python packages are required.
 * **`medmnist`**: To download and access the BreastMNIST dataset.
 * **`matplotlib`**: For plotting training and validation learning curves.
 
-Dependencies are listed in requirements.txt. You can install them using the following command.
+Other dependencies are listed in requirements.txt. You can install them using the following command.
 
 **Installation Command:**
 pip install -r requirements.txt
@@ -53,9 +53,13 @@ pip install -r requirements.txt
 ## 4. Usage Instructions
 Run the project from the root directory using the following commands:
 
+Run all experiment:
+python main.py
+
 Run Model A (SVM):
 python main.py --model A --grid_search 
 python main.py --model A --augment --grid_search 
+python main.py --model A --no_feature_extraction
 
 Run Model B (ResNet):
 python main.py --model B --resnet_version resnet18
