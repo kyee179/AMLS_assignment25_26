@@ -37,18 +37,17 @@ class ModelA:
 
         return pd.DataFrame(grid.cv_results_)
 
+    def evaluate(self, X_test, y_test, dataset_name="Test"):
+        y_pred = self.model.predict(X_test)
 
-def evaluate(self, X_test, y_test, dataset_name="Test"):
-    y_pred = self.model.predict(X_test)
+        acc = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, zero_division=0)
+        recall = recall_score(y_test, y_pred, zero_division=0)
+        f1 = f1_score(y_test, y_pred, zero_division=0)
 
-    acc = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, zero_division=0)
-    recall = recall_score(y_test, y_pred, zero_division=0)
-    f1 = f1_score(y_test, y_pred, zero_division=0)
+        print(f"--- {dataset_name} Metrics (Model A) ---")
+        print(
+            f"Accuracy:  {acc:.4f} | Precision: {precision:.4f} | Recall: {recall:.4f} | F1 Score: {f1:.4f}"
+        )
 
-    print(f"--- {dataset_name} Metrics (Model A) ---")
-    print(
-        f"Accuracy:  {acc:.4f} | Precision: {precision:.4f} | Recall: {recall:.4f} | F1 Score: {f1:.4f}"
-    )
-
-    return acc, precision, recall, f1
+        return acc, precision, recall, f1
