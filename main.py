@@ -2,6 +2,9 @@ import argparse
 import sys
 import os
 import matplotlib.pyplot as plt
+import random
+import numpy as np
+import torch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "Code"))
 
@@ -13,6 +16,18 @@ from Code.utils.preprocess import (
 )
 from Code.A.model_a import ModelA
 from Code.B.model_b import ModelB
+
+
+def set_seed(seed=917):
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    print(f"Global seed set to {seed}")
 
 
 def plot_learning_curves(history, title="Model Training"):
@@ -95,7 +110,7 @@ def run_model_b(augment=False, resnet_version="resnet18"):
 
     history = model.train(train_loader, val_loader)
 
-    plot_learning_curves(history, title=resnet_version.upper())
+    """plot_learning_curves(history, title=resnet_version.upper())"""
 
     model.evaluate(test_loader)
 
@@ -108,9 +123,9 @@ def run_all_experiments():
 
     run_model_a(augment=False, perform_grid_search=True, use_feature_extraction=True)
 
-    run_model_a(augment=True, perform_grid_search=True, use_feature_extraction=True)
+    run_model_a(augment=True, perform_grid_search=False, use_feature_extraction=True)
 
-    run_model_a(augment=False, perform_grid_search=True, use_feature_extraction=False)
+    run_model_a(augment=False, perform_grid_search=False, use_feature_extraction=False)
 
     run_model_b(augment=False, resnet_version="resnet18")
 
@@ -120,6 +135,7 @@ def run_all_experiments():
 
 
 if __name__ == "__main__":
+    set_seed(917)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--model", type=str, choices=["A", "B"], help="Model type (A or B)"
