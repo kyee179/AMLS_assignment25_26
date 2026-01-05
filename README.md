@@ -54,14 +54,21 @@ pip install -r requirements.txt
 Run the project from the root directory using the following commands:
 
 Run all experiment:
+
 python main.py
 
 Run Model A (SVM):
+
 python main.py --model A --grid_search 
+
 python main.py --model A --augment --grid_search 
+
 python main.py --model A --no_feature_extraction
 
 Run Model B (ResNet):
+
 python main.py --model B --resnet_version resnet18
+
 python main.py --model B --resnet_version resnet50
+
 python main.py --model B --augment --resnet_version resnet18
