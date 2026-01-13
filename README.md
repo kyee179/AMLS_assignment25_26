@@ -1,7 +1,7 @@
 # ELEC0134 Applied Machine Learning Systems - Project Report
 
 ## Project Description
-This project benchmarks two distinct machine learning approaches for the classification of medical images using the **BreastMNIST** dataset. It compares a classical pipeline (SVM with HOG features) against a deep learning approach (ResNet-18/50) to analyze the effects of model complexity, data augmentation, and training budgets.
+This project benchmarks two distinct machine learning approaches for the classification of medical images using the **BreastMNIST** dataset. It compares a classical pipeline (SVM with HOG features) against a deep learning approach (ResNet-18) to analyze the effects of model complexity, data augmentation, and training budgets.
 
 ---
 
@@ -45,7 +45,7 @@ To run this code, some Python packages required are listed below.
 * **`medmnist`**: To download and access the BreastMNIST dataset.
 * **`matplotlib`**: For plotting training and validation learning curves.
 
-Other dependencies are listed in requirements.txt. You can install them using the following command.
+Other dependencies are listed in **requirements.txt**. You can install them using the following command.
 
 **Installation Command:**
 pip install -r requirements.txt
