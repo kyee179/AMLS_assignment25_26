@@ -12,6 +12,12 @@ class ImagePreprocessor:
     """
 
     def __init__(self, use_hog=True, use_pca=True, pca_components=50):
+        """
+        Args:
+            use_hog (bool): Whether to apply Histogram of Oriented Gradients.
+            use_pca (bool): Whether to apply Principal Component Analysis.
+            pca_components (int): Number of components to keep if using PCA.
+        """
         self.use_hog = use_hog
         self.use_pca = use_pca
         self.pca = PCA(n_components=pca_components)
@@ -19,11 +25,27 @@ class ImagePreprocessor:
         self._is_fitted = False
 
     def _normalize(self, X):
+        """
+        Normalizes pixel values to the range [0, 1].
+
+        Args:
+            X (np.ndarray): Input array of images.
+        Returns:
+            np.ndarray: Normalized array of type float32.
+        """
         if X.max() > 1.0:
             return X.astype(np.float32) / 255.0
         return X.astype(np.float32)
 
     def extract_hog(self, images):
+        """
+        Computes HOG descriptors for a batch of images.
+
+        Args:
+            images (np.ndarray): Batch of images (N, H, W).
+        Returns:
+            np.ndarray: HOG features (N, Feature_Size).
+        """
         hog_features = []
         for img in images:
             features = hog(
@@ -38,6 +60,9 @@ class ImagePreprocessor:
         return np.array(hog_features)
 
     def fit_transform(self, X):
+        """
+        Fits the scaler (and PCA) to the training data and returns transformed features.
+        """
         X = self._normalize(X)
         if self.use_hog:
             X_processed = self.extract_hog(X)
@@ -55,6 +80,9 @@ class ImagePreprocessor:
         return X_scaled
 
     def transform(self, X):
+        """
+        Applies the learned transformations (Scaling/PCA) to new data (Test/Val).
+        """
         if not self._is_fitted:
             raise RuntimeError("Preprocessor must be fitted on training data first.")
 
@@ -108,8 +136,20 @@ def get_torch_augmentations():
 
 
 class NumpyAugmentations:
+    """
+    Static methods for performing data augmentation on NumPy arrays (for Model A).
+    """
+
     @staticmethod
     def add_gaussian_noise(images, mean=0, std=3):
+        """
+        Adds random Gaussian noise to images.
+
+        Args:
+            images (np.ndarray): Input images.
+            mean (float): Mean of the distribution.
+            std (float): Standard deviation of the distribution.
+        """
         noisy_images = images.copy().astype(np.float32)
         noise = np.random.normal(mean, std, images.shape)
         noisy_images += noise
@@ -117,5 +157,12 @@ class NumpyAugmentations:
 
     @staticmethod
     def adjust_contrast(images, alpha=1.5):
+        """
+        Adjusts contrast by scaling pixel values.
+
+        Args:
+            images (np.ndarray): Input images.
+            alpha (float): Contrast control (1.0-3.0).
+        """
         adjusted = images.astype(np.float32) * alpha
         return np.clip(adjusted, 0, 255).astype(np.uint8)

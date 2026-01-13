@@ -19,6 +19,9 @@ from Code.B.model_b import ModelB
 
 
 def set_seed(seed=917):
+    """
+    Sets global seeds for Python, NumPy, and PyTorch to ensure reproducibility.
+    """
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
     np.random.seed(seed)
@@ -58,6 +61,14 @@ def plot_learning_curves(history, title="Model Training"):
 
 
 def run_model_a(augment=False, perform_grid_search=False, use_feature_extraction=True):
+    """
+    Orchestrates the pipeline for Model A (SVM).
+
+    Args:
+        augment (bool): If True, applies Gaussian noise and contrast adjustment.
+        perform_grid_search (bool): If True, runs GridSearchCV for hyperparameters.
+        use_feature_extraction (bool): If True, uses HOG+PCA; otherwise uses raw pixels.
+    """
     mode_str = "SVM + HOG + PCA" if use_feature_extraction else "SVM + Raw Pixels"
     print(f"\n=== Running Model A ({mode_str}) ===")
     (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_breastmnist_numpy()
@@ -95,6 +106,13 @@ def run_model_a(augment=False, perform_grid_search=False, use_feature_extraction
 
 
 def run_model_b(augment=False, resnet_version="resnet18"):
+    """
+    Orchestrates the pipeline for Model B (CNN).
+
+    Args:
+        augment (bool): If True, applies PyTorch transforms (ColorJitter, Noise).
+        resnet_version (str): Architecture variant ('resnet18' or 'resnet50').
+    """
     print(f"\n=== Running Model B ({resnet_version.upper()}) ===")
 
     if augment:
@@ -110,7 +128,7 @@ def run_model_b(augment=False, resnet_version="resnet18"):
 
     history = model.train(train_loader, val_loader)
 
-    """plot_learning_curves(history, title=resnet_version.upper())"""
+    plot_learning_curves(history, title=resnet_version.upper())
 
     model.evaluate(test_loader)
 

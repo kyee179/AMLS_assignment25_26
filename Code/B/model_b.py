@@ -58,6 +58,16 @@ class ModelB:
         }
 
     def train(self, train_loader, val_loader):
+        """
+        Executes the training loop over the specified number of epochs.
+
+        Args:
+            train_loader (DataLoader): Loader for training data.
+            val_loader (DataLoader): Loader for validation data.
+
+        Returns:
+            dict: History of loss and accuracy for plotting.
+        """
         print(
             f"Training {self.model_type.upper()} on {self.device} for {self.epochs} epochs..."
         )
@@ -104,6 +114,15 @@ class ModelB:
         return self.history
 
     def _validate(self, loader):
+        """
+        Helper method to evaluate model performance on validation data during training.
+
+        Args:
+            loader (DataLoader): Validation dataloader.
+
+        Returns:
+            tuple: (average_loss, accuracy)
+        """
         self.model.eval()
         running_loss = 0.0
         correct = 0
@@ -123,6 +142,16 @@ class ModelB:
         return running_loss / len(loader), correct / total
 
     def evaluate(self, loader, dataset_name="Test"):
+        """
+        Evaluates the model on the test set and prints metrics.
+
+        Args:
+            loader (DataLoader): Test dataloader.
+            dataset_name (str): Name of the dataset being evaluated.
+
+        Returns:
+            tuple: (accuracy, f1_score)
+        """
         self.model.eval()
         y_true, y_pred = [], []
         with torch.no_grad():

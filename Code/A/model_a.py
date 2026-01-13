@@ -5,6 +5,10 @@ import pandas as pd
 
 
 class ModelA:
+    """
+    Wraps the SVM classifier workflow, including training, grid search, and evaluation.
+    """
+
     def __init__(self, kernel="rbf", C=1.0, gamma="scale"):
         self.kernel = kernel
         self.C = C
@@ -15,6 +19,13 @@ class ModelA:
         self.best_params = None
 
     def train(self, X_train, y_train):
+        """
+        Fits the SVM model to the training data.
+
+        Args:
+            X_train (array-like): Feature matrix.
+            y_train (array-like): Target labels.
+        """
         print(f"Training SVM (Kernel: {self.kernel}, C: {self.C})...")
         self.model.fit(X_train, y_train)
 
@@ -38,6 +49,17 @@ class ModelA:
         return pd.DataFrame(grid.cv_results_)
 
     def evaluate(self, X_test, y_test, dataset_name="Test"):
+        """
+        Predicts on test data and prints classification metrics.
+
+        Args:
+            X_test (array-like): Test features.
+            y_test (array-like): True test labels.
+            dataset_name (str): Label for the print output (e.g. 'Validation').
+
+        Returns:
+            tuple: (accuracy, precision, recall, f1)
+        """
         y_pred = self.model.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
