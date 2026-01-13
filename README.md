@@ -35,6 +35,8 @@ The role of each file in the repository is described below:
 ---
 
 ## 3. Required Packages
+
+The Python version is 3.9.
 To run this code, some Python packages required are listed below.
 
 * **`numpy`**: For array manipulation and data handling.
