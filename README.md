@@ -36,8 +36,8 @@ The role of each file in the repository is described below:
 
 ## 3. Required Packages
 
-The Python version is 3.9.
-To run this code, some Python packages required are listed below.
+This project requires **Python 3.9**.
+To run this code, some important Python packages required are listed below.
 
 * **`numpy`**: For array manipulation and data handling.
 * **`torch`** & **`torchvision`**: For building and training the ResNet model (Model B) and data transformations.
@@ -47,30 +47,45 @@ To run this code, some Python packages required are listed below.
 * **`medmnist`**: To download and access the BreastMNIST dataset.
 * **`matplotlib`**: For plotting training and validation learning curves.
 
-Other dependencies are listed in **requirements.txt**. You can install them using the following command.
+To install all dependencies, run the following command:
 
-**Installation Command:**
+```bash
 pip install -r requirements.txt
+```
+
 
 ## 4. Usage Instructions
+
 Run the project from the root directory using the following commands:
 
 Run all experiment:
 
+```bash
 python main.py
+```
 
 Run Model A (SVM):
 
+```bash
+# Standard run with Grid Search
 python main.py --model A --grid_search 
 
+# With Data Augmentation
 python main.py --model A --augment --grid_search 
 
+# Without HOG Feature Extraction
 python main.py --model A --no_feature_extraction
+```
 
 Run Model B (ResNet):
 
+```bash
+# Run ResNet-18
 python main.py --model B --resnet_version resnet18
 
+# Run ResNet-50
 python main.py --model B --resnet_version resnet50
 
+# Run ResNet-18 with Data Augmentation
 python main.py --model B --augment --resnet_version resnet18
+```
